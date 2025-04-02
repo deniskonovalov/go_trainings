@@ -1,1 +1,1 @@
-module first
+module learningGo
