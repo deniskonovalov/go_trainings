@@ -2,51 +2,76 @@ package main
 
 import (
 	"fmt"
-	"learningGo/lesson2"
+	"learningGo/documentstore"
 )
 
 func main() {
+	document1 := documentstore.Document{
+		Fields: map[string]documentstore.DocumentField{
+			"key": {
+				Type:  documentstore.DocumentFieldTypeString,
+				Value: "key1",
+			},
+			"boolField": {
+				Type:  documentstore.DocumentFieldTypeBool,
+				Value: true,
+			},
+			"numberField": {
+				Type:  documentstore.DocumentFieldTypeNumber,
+				Value: 123,
+			},
+		},
+	}
 
-	// FibonacciIterative tests
-	fmt.Printf("FibonacciIterative(1): %d\n", lesson2.FibonacciIterative(1))
-	fmt.Printf("FibonacciIterative(8): %d\n", lesson2.FibonacciIterative(8))
-	fmt.Printf("FibonacciIterative(77): %d\n", lesson2.FibonacciIterative(11))
+	document2 := documentstore.Document{
+		Fields: map[string]documentstore.DocumentField{
+			"key": {
+				Type:  documentstore.DocumentFieldTypeString,
+				Value: "key2",
+			},
+			"arrayField": {
+				Type:  documentstore.DocumentFieldTypeArray,
+				Value: []int{1, 2, 3},
+			},
+			"objectField": {
+				Type:  documentstore.DocumentFieldTypeObject,
+				Value: document1,
+			},
+		},
+	}
 
-	// FibonacciRecursive tests
-	fmt.Printf("FibonacciRecursive(1): %d\n", lesson2.FibonacciRecursive(1))
-	fmt.Printf("FibonacciRecursive(8): %d\n", lesson2.FibonacciRecursive(8))
-	fmt.Printf("FibonacciRecursive(77): %d\n", lesson2.FibonacciRecursive(11))
+	if _, err := documentstore.Put(document1); err != nil {
+		fmt.Println(err)
+	}
 
-	// IsPrime tests
-	fmt.Printf("IsPrime(1): %t\n", lesson2.IsPrime(1))
-	fmt.Printf("IsPrime(2): %t\n", lesson2.IsPrime(2))
-	fmt.Printf("IsPrime(5): %t\n", lesson2.IsPrime(5))
-	fmt.Printf("IsPrime(8): %t\n", lesson2.IsPrime(8))
-	fmt.Printf("IsPrime(15): %t\n", lesson2.IsPrime(15))
-	fmt.Printf("IsPrime(151): %t\n", lesson2.IsPrime(151))
-	fmt.Printf("IsPrime(6123842): %t\n", lesson2.IsPrime(6123842))
+	if _, err := documentstore.Put(document2); err != nil {
+		fmt.Println(err)
+	}
 
-	//IsBinaryPalindrome tests
-	fmt.Printf("lesson2.IsBinaryPalindrome(4): %t\n", lesson2.IsBinaryPalindrome(4))
-	fmt.Printf("lesson2.IsBinaryPalindrome(5): %t\n", lesson2.IsBinaryPalindrome(5))
-	fmt.Printf("lesson2.IsBinaryPalindrome(9): %t\n", lesson2.IsBinaryPalindrome(9))
-	fmt.Printf("lesson2.IsBinaryPalindrome(19): %t\n", lesson2.IsBinaryPalindrome(19))
-	fmt.Printf("lesson2.IsBinaryPalindrome(585): %t\n", lesson2.IsBinaryPalindrome(585))
+	documentWithoutKey := documentstore.Document{
+		Fields: map[string]documentstore.DocumentField{
+			"someField": {
+				Type:  documentstore.DocumentFieldTypeString,
+				Value: "Some String Value",
+			},
+		},
+	}
 
-	fmt.Printf("lesson2.IsBinaryPalindromeByTwoIndexes(4): %t\n", lesson2.IsBinaryPalindromeByTwoIndexes(4))
-	fmt.Printf("lesson2.IsBinaryPalindromeByTwoIndexes(5): %t\n", lesson2.IsBinaryPalindromeByTwoIndexes(5))
-	fmt.Printf("lesson2.IsBinaryPalindromeByTwoIndexes(9): %t\n", lesson2.IsBinaryPalindromeByTwoIndexes(9))
-	fmt.Printf("lesson2.IsBinaryPalindromeByTwoIndexes(19): %t\n", lesson2.IsBinaryPalindromeByTwoIndexes(19))
-	fmt.Printf("lesson2.IsBinaryPalindromeByTwoIndexes(585): %t\n", lesson2.IsBinaryPalindromeByTwoIndexes(585))
+	if _, err := documentstore.Put(documentWithoutKey); err != nil {
+		fmt.Println(err)
+	}
 
-	// ValidParentheses tests
-	fmt.Printf("lesson2.ValidParentheses('()[]}{}'): %t\n", lesson2.ValidParentheses("()[]}{}"))
-	fmt.Printf("lesson2.ValidParentheses('((one)[two]{three}'): %t\n", lesson2.ValidParentheses("(one)[two]{three}"))
-	fmt.Printf("lesson2.ValidParentheses('(one[two]){three}'): %t\n", lesson2.ValidParentheses("(one[two]){three}"))
-	fmt.Printf("lesson2.ValidParentheses('(one[two]{three}'): %t\n", lesson2.ValidParentheses("(one[two]{three}"))
+	foundDocument, _ := documentstore.Get("key1")
+	fmt.Println(foundDocument)
 
-	// Increment test
-	fmt.Printf("lesson2.Increment('101'): %d\n", lesson2.Increment("101"))
-	fmt.Printf("lesson2.Increment('1001'): %d\n", lesson2.Increment("1001"))
-	fmt.Printf("lesson2.Increment('10010'): %d\n", lesson2.Increment("10010"))
+	getByIncorrectKey, _ := documentstore.Get("incorrectKey")
+	fmt.Println(getByIncorrectKey)
+
+	listOfDocuments := documentstore.List()
+	fmt.Println(listOfDocuments)
+
+	documentstore.Delete("key1")
+
+	listOfDocuments = documentstore.List()
+	fmt.Println(listOfDocuments)
 }
