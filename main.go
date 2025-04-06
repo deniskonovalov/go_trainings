@@ -6,6 +6,16 @@ import (
 )
 
 func main() {
+	store := documentstore.NewStore()
+	collectionConfig := &documentstore.CollectionConfig{PrimaryKey: "key"}
+
+	isCreated, collection := store.CreateCollection("my_first_collection", collectionConfig)
+
+	if !isCreated {
+		fmt.Println("Collection was not created")
+		return
+	}
+
 	document1 := documentstore.Document{
 		Fields: map[string]documentstore.DocumentField{
 			"key": {
@@ -23,6 +33,10 @@ func main() {
 		},
 	}
 
+	if err := collection.Put(document1); err != nil {
+		fmt.Println(err)
+	}
+
 	document2 := documentstore.Document{
 		Fields: map[string]documentstore.DocumentField{
 			"key": {
@@ -35,43 +49,43 @@ func main() {
 			},
 			"objectField": {
 				Type:  documentstore.DocumentFieldTypeObject,
-				Value: document1,
+				Value: map[string]any{"SomeFiled": "someValue"},
 			},
 		},
 	}
 
-	if _, err := documentstore.Put(document1); err != nil {
+	if err := collection.Put(document2); err != nil {
 		fmt.Println(err)
 	}
 
-	if _, err := documentstore.Put(document2); err != nil {
-		fmt.Println(err)
-	}
+	allDocuments := collection.List()
 
-	documentWithoutKey := documentstore.Document{
+	fmt.Println(allDocuments)
+
+	store.CreateCollection("my_second_collection", collectionConfig)
+
+	secondCollection, _ := store.GetCollection("my_second_collection")
+
+	doc3 := documentstore.Document{
 		Fields: map[string]documentstore.DocumentField{
-			"someField": {
+			"key": {
 				Type:  documentstore.DocumentFieldTypeString,
-				Value: "Some String Value",
+				Value: "key3",
+			},
+			"boolField": {
+				Type:  documentstore.DocumentFieldTypeBool,
+				Value: true,
 			},
 		},
 	}
 
-	if _, err := documentstore.Put(documentWithoutKey); err != nil {
+	if err := secondCollection.Put(doc3); err != nil {
 		fmt.Println(err)
 	}
 
-	foundDocument, _ := documentstore.Get("key1")
-	fmt.Println(foundDocument)
+	fmt.Println(secondCollection.List())
 
-	getByIncorrectKey, _ := documentstore.Get("incorrectKey")
-	fmt.Println(getByIncorrectKey)
+	secondCollection.Delete("key3")
 
-	listOfDocuments := documentstore.List()
-	fmt.Println(listOfDocuments)
-
-	documentstore.Delete("key1")
-
-	listOfDocuments = documentstore.List()
-	fmt.Println(listOfDocuments)
+	fmt.Println(secondCollection.List())
 }
