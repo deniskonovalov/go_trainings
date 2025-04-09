@@ -48,7 +48,7 @@ func (s *Collection) Delete(key string) bool {
 }
 
 func (s *Collection) List() []Document {
-	var documentList []Document
+	documentList := make([]Document, len(s.items))
 
 	for _, doc := range s.items {
 		documentList = append(documentList, doc)
