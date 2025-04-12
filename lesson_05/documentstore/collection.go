@@ -47,7 +47,7 @@ func (s *Collection) Delete(key string) error {
 }
 
 func (s *Collection) List() []Document {
-	var documentList []Document
+	documentList := make([]Document, 0, len(s.items))
 
 	for _, doc := range s.items {
 		documentList = append(documentList, doc)

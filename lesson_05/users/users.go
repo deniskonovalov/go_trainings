@@ -42,16 +42,15 @@ func (s *Service) CreateUser(username string) (*User, error) {
 func (s *Service) ListUsers() ([]User, error) {
 	list := s.coll.List()
 
-	userList := make([]User, len(list))
+	userList := make([]User, 0, len(list))
 
-	for i, doc := range list {
+	for _, doc := range list {
 		u := User{}
 
 		if err := documentstore.UnmarshalDocument(&doc, &u); err != nil {
 			return nil, err
 		}
-
-		userList[i] = u
+		userList = append(userList, u)
 	}
 
 	return userList, nil
