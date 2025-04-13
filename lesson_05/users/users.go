@@ -1,6 +1,7 @@
 package users
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"learningGo/lesson_05/documentstore"
 )
@@ -14,9 +15,16 @@ type Service struct {
 	coll documentstore.Collection
 }
 
-func NewService(coll documentstore.Collection) *Service {
+func NewService(s documentstore.Store) *Service {
+	coll, err := s.CreateCollection("users", &documentstore.CollectionConfig{PrimaryKey: "id"})
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
 	return &Service{
-		coll: coll,
+		coll: *coll,
 	}
 }
 

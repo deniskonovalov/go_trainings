@@ -10,23 +10,26 @@ import (
 func main() {
 	store := documentstore.NewStore()
 
-	coll, err := store.CreateCollection("users", &documentstore.CollectionConfig{PrimaryKey: "id"})
+	service := users.NewService(*store)
+
+	_, err := service.CreateUser("Mike")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	service := users.NewService(*coll)
-
-	_, err = service.CreateUser("Mike")
-	if err != nil {
+	if _, err = service.CreateUser("John"); err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	_, _ = service.CreateUser("John")
-	_, _ = service.CreateUser("Julie")
-	_, _ = service.CreateUser("Felix")
+	if _, err = service.CreateUser("Julie"); err != nil {
+		fmt.Println(err)
+		return
+	}
+	if _, err = service.CreateUser("Felix"); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	l, err := service.ListUsers()
 
