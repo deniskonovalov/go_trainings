@@ -9,7 +9,7 @@ import (
 func main() {
 	s := documentstore.NewStore()
 
-	service := users.NewService(*s)
+	service := users.NewService(s)
 
 	usernames := [6]string{
 		"Mike",
@@ -45,7 +45,7 @@ func main() {
 		return
 	}
 
-	serviceFromRestored := users.NewService(*restored)
+	serviceFromRestored := users.NewService(restored)
 
 	list, err := service.ListUsers()
 	if err != nil {
@@ -73,7 +73,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	serviceFromFile := users.NewService(*newStore)
+	serviceFromFile := users.NewService(newStore)
 
 	usersFromFile, err := serviceFromFile.ListUsers()
 	if err != nil {

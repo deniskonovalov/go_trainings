@@ -9,6 +9,21 @@ type CollectionConfig struct {
 	PrimaryKey string
 }
 
+// dumpCollection is a DTO used to serialize Collection,
+// because original Collection has unexported fields,
+type dumpCollection struct {
+	Config CollectionConfig
+	Items  map[string]Document
+}
+
+// toDump returns a DTO representation of Collection for serialization.
+func (c *Collection) toDump() dumpCollection {
+	return dumpCollection{
+		Config: c.config,
+		Items:  c.items,
+	}
+}
+
 func (c *Collection) Put(doc Document) error {
 	key, exists := doc.Fields[c.config.PrimaryKey]
 

@@ -7,6 +7,9 @@ import (
 	"learningGo/lesson_06/documentstore"
 )
 
+const cn string = "users"
+const pk string = "id"
+
 type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -16,11 +19,11 @@ type Service struct {
 	coll documentstore.Collection
 }
 
-func NewService(s documentstore.Store) *Service {
-	coll, err := s.GetCollection("users")
+func NewService(s *documentstore.Store) *Service {
+	coll, err := s.GetCollection(cn)
 
 	if err != nil && errors.Is(err, documentstore.ErrCollectionNotFound) {
-		coll, err = s.CreateCollection("users", &documentstore.CollectionConfig{PrimaryKey: "id"})
+		coll, err = s.CreateCollection(cn, &documentstore.CollectionConfig{PrimaryKey: pk})
 		if err != nil {
 			fmt.Println(err)
 			return nil
