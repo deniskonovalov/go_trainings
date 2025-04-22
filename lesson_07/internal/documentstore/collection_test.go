@@ -1,6 +1,7 @@
 package documentstore
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -16,26 +17,61 @@ func getTestDocument(id string) Document {
 	}
 }
 
-func getTestCollection() Collection {
-	return Collection{
-		items: map[string]Document{},
-		config: CollectionConfig{
-			PrimaryKey: "id",
-		},
+func getTestCollection() *Collection {
+	return &Collection{
+		items:  map[string]Document{},
+		config: CollectionConfig{},
 	}
 }
 
+type CollectionBuilder struct {
+	collection *Collection
+	config     CollectionConfig
+	documents  map[string]Document
+}
+
+func NewCollectionBuilder(c *Collection) *CollectionBuilder {
+	return &CollectionBuilder{
+		collection: c,
+		config:     c.config,
+		documents:  c.items,
+	}
+}
+
+func (b *CollectionBuilder) WithConfig(c CollectionConfig) *CollectionBuilder {
+	b.config = c
+	return b
+}
+
+func (b *CollectionBuilder) AddDocument(d Document) *CollectionBuilder {
+	key, exists := d.Fields[b.config.PrimaryKey]
+	if !exists || key.Type != DocumentFieldTypeString {
+		fmt.Println("document has no primary key")
+		return b
+	}
+
+	b.documents[key.Value.(string)] = d
+
+	return b
+}
+
+func (b *CollectionBuilder) Build() *Collection {
+	b.collection.items = b.documents
+	b.collection.config = b.config
+	return b.collection
+}
+
 func Test_Get_Returns_Document(t *testing.T) {
+	config := CollectionConfig{
+		PrimaryKey: "id",
+	}
+
 	doc := getTestDocument("100")
 
-	coll := Collection{
-		items: map[string]Document{
-			"100": doc,
-		},
-		config: CollectionConfig{
-			PrimaryKey: "id",
-		},
-	}
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	collBuilder.AddDocument(doc)
+	coll := collBuilder.Build()
 
 	document, err := coll.Get("100")
 
@@ -46,14 +82,14 @@ func Test_Get_Returns_Document(t *testing.T) {
 
 func Test_Get_Returns_ErrDocumentNotFound(t *testing.T) {
 
-	coll := Collection{
-		items: map[string]Document{
-			"122": getTestDocument("122"),
-		},
-		config: CollectionConfig{
-			PrimaryKey: "id",
-		},
+	config := CollectionConfig{
+		PrimaryKey: "id",
 	}
+
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	collBuilder.AddDocument(getTestDocument("122"))
+	coll := collBuilder.Build()
 
 	_, err := coll.Get("100")
 
@@ -63,9 +99,15 @@ func Test_Get_Returns_ErrDocumentNotFound(t *testing.T) {
 }
 
 func Test_Put_Adds_Document(t *testing.T) {
-	coll := getTestCollection()
+	config := CollectionConfig{
+		PrimaryKey: "id",
+	}
 
 	doc := getTestDocument("100")
+
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	coll := collBuilder.Build()
 
 	err := coll.Put(doc)
 
@@ -96,7 +138,13 @@ func Test_Put_Returns_Document_ErrDocumentPrimaryKeyIsMissing(t *testing.T) {
 }
 
 func Test_Put_Returns_ValidationError(t *testing.T) {
-	coll := getTestCollection()
+	config := CollectionConfig{
+		PrimaryKey: "id",
+	}
+
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	coll := collBuilder.Build()
 
 	doc := Document{
 		Fields: map[string]DocumentField{
@@ -120,7 +168,14 @@ func Test_Put_Returns_ValidationError(t *testing.T) {
 }
 
 func Test_Delete_Removes_Document(t *testing.T) {
-	coll := getTestCollection()
+	config := CollectionConfig{
+		PrimaryKey: "id",
+	}
+
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	coll := collBuilder.Build()
+
 	coll.items["100"] = getTestDocument("100")
 
 	err := coll.Delete("100")
@@ -130,7 +185,14 @@ func Test_Delete_Removes_Document(t *testing.T) {
 }
 
 func Test_Delete_Returns_ErrDocumentNotFound(t *testing.T) {
-	coll := getTestCollection()
+	config := CollectionConfig{
+		PrimaryKey: "id",
+	}
+
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	coll := collBuilder.Build()
+
 	coll.items["100"] = getTestDocument("100")
 
 	err := coll.Delete("111")
@@ -143,7 +205,14 @@ func Test_Delete_Returns_ErrDocumentNotFound(t *testing.T) {
 }
 
 func Test_List_Returns_All_Documents(t *testing.T) {
-	coll := getTestCollection()
+	config := CollectionConfig{
+		PrimaryKey: "id",
+	}
+
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	coll := collBuilder.Build()
+
 	coll.items["100"] = getTestDocument("100")
 	coll.items["101"] = getTestDocument("101")
 	coll.items["102"] = getTestDocument("102")
@@ -158,7 +227,13 @@ func Test_List_Returns_All_Documents(t *testing.T) {
 }
 
 func Test_List_Returns_Empty_Slice(t *testing.T) {
-	coll := getTestCollection()
+	config := CollectionConfig{
+		PrimaryKey: "id",
+	}
+
+	collBuilder := NewCollectionBuilder(getTestCollection())
+	collBuilder.WithConfig(config)
+	coll := collBuilder.Build()
 
 	l := coll.List()
 
