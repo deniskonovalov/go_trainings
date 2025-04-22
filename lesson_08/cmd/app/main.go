@@ -8,10 +8,7 @@ import (
 func main() {
 	c := lru.NewLruCache(3)
 
-	//fmt.Printf("%+v\n", c)
-
 	c.Put("key", "value")
-	//fmt.Printf("%+v\n", c)
 
 	c.Put("key2", "value2")
 	c.Put("key4", "value11111")
@@ -21,8 +18,6 @@ func main() {
 
 	c.Put("key3", "value11111")
 
-	//
 	fmt.Println(c.Get("key7"))
 	fmt.Println(c.Get("key"))
-
 }
