@@ -10,7 +10,7 @@ import (
 
 type Store struct {
 	mu          sync.RWMutex
-	Collections map[string]*Collection
+	collections map[string]*Collection
 }
 
 // dumpStore is a DTO used to serialize Store.
@@ -19,14 +19,14 @@ type dumpStore struct {
 }
 
 func NewStore() *Store {
-	return &Store{Collections: map[string]*Collection{}}
+	return &Store{collections: map[string]*Collection{}}
 }
 
 func (s *Store) CreateCollection(name string, cfg *CollectionConfig) (*Collection, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, exists := s.Collections[name]; exists {
+	if _, exists := s.collections[name]; exists {
 		return nil, ErrCollectionAlreadyExists
 	}
 
@@ -36,7 +36,7 @@ func (s *Store) CreateCollection(name string, cfg *CollectionConfig) (*Collectio
 		indexes: map[string]*btree.Map[string, string]{},
 	}
 
-	s.Collections[name] = collection
+	s.collections[name] = collection
 
 	return collection, nil
 }
@@ -45,7 +45,7 @@ func (s *Store) GetCollection(name string) (*Collection, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	if collection, exists := s.Collections[name]; exists {
+	if collection, exists := s.collections[name]; exists {
 		return collection, nil
 	}
 
@@ -56,11 +56,11 @@ func (s *Store) DeleteCollection(name string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, exists := s.Collections[name]; !exists {
+	if _, exists := s.collections[name]; !exists {
 		return ErrCollectionNotFound
 	}
 
-	delete(s.Collections, name)
+	delete(s.collections, name)
 
 	return nil
 }
@@ -74,7 +74,7 @@ func (s *Store) toDump() dumpStore {
 		Collections: make(map[string]dumpCollection),
 	}
 
-	for name, col := range s.Collections {
+	for name, col := range s.collections {
 		result.Collections[name] = col.toDump()
 	}
 
@@ -107,11 +107,11 @@ func NewStoreFromDump(dump []byte) (*Store, error) {
 	}
 
 	store := &Store{
-		Collections: make(map[string]*Collection),
+		collections: make(map[string]*Collection),
 	}
 
 	for name, dumpedCol := range dumpStore.Collections {
-		store.Collections[name] = &Collection{
+		store.collections[name] = &Collection{
 			config:  dumpedCol.Config,
 			items:   dumpedCol.Items,
 			indexes: make(map[string]*btree.Map[string, string]),
@@ -122,7 +122,7 @@ func NewStoreFromDump(dump []byte) (*Store, error) {
 			for key, value := range index {
 				tree.Set(key, value)
 			}
-			store.Collections[name].indexes[field] = tree
+			store.collections[name].indexes[field] = tree
 		}
 	}
 
