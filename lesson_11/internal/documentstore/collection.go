@@ -52,17 +52,14 @@ func (c *Collection) toDump() dumpCollection {
 }
 
 func (c *Collection) Put(doc Document) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	k, exists := doc.Fields[c.config.PrimaryKey]
-
 	if !exists || k.Type != DocumentFieldTypeString {
 
 		return ErrDocumentPrimaryKeyIsMissing
 	}
-
 	keyString := k.Value.(string)
+
+	c.mu.Lock()
 
 	if existingDoc, exists := c.items[keyString]; exists {
 		for field, tree := range c.indexes {
@@ -84,6 +81,8 @@ func (c *Collection) Put(doc Document) error {
 			tree.Set(docField.Value.(string), keyString)
 		}
 	}
+
+	c.mu.Unlock()
 
 	return nil
 }
@@ -129,12 +128,13 @@ func (c *Collection) Delete(key string) error {
 
 func (c *Collection) List() []Document {
 	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	documentList := make([]Document, 0, len(c.items))
 
 	for _, doc := range c.items {
 		documentList = append(documentList, *doc)
 	}
-	c.mu.RUnlock()
 
 	return documentList
 }
