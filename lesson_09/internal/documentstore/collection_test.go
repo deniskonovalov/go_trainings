@@ -95,9 +95,9 @@ func Test_Get_Returns_ErrDocumentNotFound(t *testing.T) {
 
 	_, err := coll.Get("100")
 
-	if assert.Error(t, err) {
-		assert.Equal(t, ErrDocumentNotFound, err)
-	}
+	assert.Error(t, err)
+	assert.Equal(t, ErrDocumentNotFound, err)
+
 }
 
 func Test_Put_Adds_Document(t *testing.T) {
