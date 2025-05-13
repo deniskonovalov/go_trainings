@@ -18,8 +18,8 @@ func Test_NewStore(t *testing.T) {
 
 	assert.NotNil(t, s)
 	assert.IsType(t, &Store{}, s)
-	assert.IsType(t, map[string]*Collection{}, s.Collections)
-	assert.Empty(t, s.Collections)
+	assert.IsType(t, map[string]*Collection{}, s.collections)
+	assert.Empty(t, s.collections)
 }
 
 func Test_CreateCollection(t *testing.T) {
@@ -44,7 +44,7 @@ func Test_CreateCollection_ErrCollectionAlreadyExists(t *testing.T) {
 
 	cnf := getTestConfig()
 
-	s.Collections["test"] = &Collection{
+	s.collections["test"] = &Collection{
 		items:  map[string]*Document{},
 		config: cnf,
 	}
@@ -59,7 +59,7 @@ func Test_CreateCollection_ErrCollectionAlreadyExists(t *testing.T) {
 func Test_GetCollection(t *testing.T) {
 	s := NewStore()
 
-	s.Collections["test"] = &Collection{
+	s.collections["test"] = &Collection{
 		items:  map[string]*Document{},
 		config: getTestConfig(),
 	}
@@ -67,7 +67,7 @@ func Test_GetCollection(t *testing.T) {
 	coll, err := s.GetCollection("test")
 	assert.Nil(t, err)
 	assert.IsType(t, &Collection{}, coll)
-	assert.Equal(t, s.Collections["test"], coll)
+	assert.Equal(t, s.collections["test"], coll)
 }
 
 func Test_GetCollection_ErrCollectionNotFound(t *testing.T) {
@@ -82,7 +82,7 @@ func Test_GetCollection_ErrCollectionNotFound(t *testing.T) {
 
 func Test_DeleteCollection(t *testing.T) {
 	s := NewStore()
-	s.Collections["test"] = &Collection{
+	s.collections["test"] = &Collection{
 		items:  map[string]*Document{},
 		config: getTestConfig(),
 	}
@@ -90,19 +90,19 @@ func Test_DeleteCollection(t *testing.T) {
 	err := s.DeleteCollection("test")
 
 	assert.Nil(t, err)
-	assert.NotContains(t, s.Collections, "test")
+	assert.NotContains(t, s.collections, "test")
 }
 
 func Test_DeleteCollection_ErrCollectionNotFound(t *testing.T) {
 	s := NewStore()
-	s.Collections["test"] = &Collection{
+	s.collections["test"] = &Collection{
 		items:  map[string]*Document{},
 		config: getTestConfig(),
 	}
 
 	err := s.DeleteCollection("test2")
 	assert.NotNil(t, err)
-	assert.Contains(t, s.Collections, "test")
+	assert.Contains(t, s.collections, "test")
 	assert.Equal(t, ErrCollectionNotFound, err)
 }
 
@@ -162,7 +162,7 @@ func Test_NewStoreFromDump_Empty_Store(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, restoredStore)
-	assert.Equal(t, 0, len(restoredStore.Collections))
+	assert.Equal(t, 0, len(restoredStore.collections))
 }
 
 func Test_NewStoreFromDump_Store_With_Collections(t *testing.T) {
@@ -198,8 +198,8 @@ func Test_NewStoreFromDump_Store_With_Collections(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, restoredStore)
 
-	assert.Equal(t, 1, len(restoredStore.Collections))
-	restoredCollection, exists := restoredStore.Collections["test_collection"]
+	assert.Equal(t, 1, len(restoredStore.collections))
+	restoredCollection, exists := restoredStore.collections["test_collection"]
 	assert.True(t, exists)
 	assert.NotNil(t, restoredCollection)
 
@@ -306,8 +306,8 @@ func Test_NewStoreFromFile(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, restoredStore)
 
-	assert.Equal(t, 1, len(restoredStore.Collections))
-	restoredCollection, exists := restoredStore.Collections["test_collection"]
+	assert.Equal(t, 1, len(restoredStore.collections))
+	restoredCollection, exists := restoredStore.collections["test_collection"]
 	assert.True(t, exists)
 	assert.NotNil(t, restoredCollection)
 
