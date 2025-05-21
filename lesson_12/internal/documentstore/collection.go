@@ -216,3 +216,7 @@ func (c *Collection) Query(fieldName string, params QueryParams) ([]Document, er
 
 	return docList, nil
 }
+
+func (c *Collection) GetPrimaryKey() string {
+	return c.config.PrimaryKey
+}

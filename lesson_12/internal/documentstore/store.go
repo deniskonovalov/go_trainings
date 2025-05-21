@@ -152,3 +152,7 @@ func NewStoreFromFile(filename string) (*Store, error) {
 
 	return NewStoreFromDump(data)
 }
+
+func (s *Store) ListCollections() map[string]*Collection {
+	return s.collections
+}

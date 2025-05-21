@@ -22,17 +22,26 @@ type Document struct {
 }
 
 func MarshalDocument(input any) (*Document, error) {
-	d := Document{
-		Fields: make(map[string]DocumentField),
-	}
 	jsonData, err := json.Marshal(input)
-
 	if err != nil {
 		return nil, err
 	}
 
+	d, err := MakeDocument(jsonData)
+	if err != nil {
+		return nil, err
+	}
+
+	return d, nil
+}
+
+func MakeDocument(data []byte) (*Document, error) {
+	d := Document{
+		Fields: make(map[string]DocumentField),
+	}
+
 	m := make(map[string]any)
-	err = json.Unmarshal(jsonData, &m)
+	err := json.Unmarshal(data, &m)
 
 	if err != nil {
 		return nil, err
@@ -45,7 +54,7 @@ func MarshalDocument(input any) (*Document, error) {
 		}
 	}
 
-	return &d, err
+	return &d, nil
 }
 
 func UnmarshalDocument(doc *Document, output any) error {
