@@ -1,0 +1,35 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        component: server
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      start_period: 1s
+
+  client:
+    environment:
+      - SERVER_ADDR=server:8080
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        component: client
+    depends_on:
+      server:
+        condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

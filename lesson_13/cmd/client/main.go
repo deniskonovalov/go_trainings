@@ -8,11 +8,13 @@ import (
 	"os"
 )
 
+var address = os.Getenv("SERVER_ADDR")
+
 func main() {
 	us := bufio.NewScanner(os.Stdin)
 	uw := bufio.NewWriter(os.Stdout)
 
-	conn, err := net.Dial("tcp", ":8080")
+	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		panic(err)
 	}
